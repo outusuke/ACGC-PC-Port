@@ -1,0 +1,21 @@
+name: Flatpak
+
+on:
+  push:
+    branches: [master, flatpak-support]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-25.08
+      options: --privileged
+    steps:
+      - uses: actions/checkout@v4
+      - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+        with:
+          bundle: AnimalCrossingPCPort.flatpak
+          manifest-path: flatpak/io.github.flyngmt.ACGCPCPort.yml
+          cache-key: flatpak-builder-${{ github.sha }}
