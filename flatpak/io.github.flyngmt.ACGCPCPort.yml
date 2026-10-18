@@ -52,6 +52,7 @@ x-i386-build-options: &i386-build-options
 modules:
   - name: sdl2
     buildsystem: cmake-ninja
+    builddir: true
     build-options: *i386-build-options
     config-opts:
       - -DCMAKE_INSTALL_LIBDIR=lib32
