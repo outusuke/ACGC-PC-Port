@@ -1,5 +1,5 @@
-#ifndef _CTYPE_H
-#define _CTYPE_H
+#ifndef MSL_C_CTYPE_H
+#define MSL_C_CTYPE_H
 
 #ifdef TARGET_PC
 #include <ctype.h> // Conflicts can happen otherwise in certain compiler versions
