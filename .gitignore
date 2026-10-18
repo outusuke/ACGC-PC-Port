@@ -21,6 +21,10 @@ orig/*/*
 # Build files
 build/
 build32/
+.flatpak-builder/
+flatpak-build/
+flatpak-repo/
+*.flatpak
 .ninja_*
 build.ninja
 

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Animal Crossing PC Port
+Comment=Native PC port of Animal Crossing (GameCube)
+Exec=acgc-pc-port
+Icon=io.github.flyngmt.ACGCPCPort
+Terminal=false
+Categories=Game;

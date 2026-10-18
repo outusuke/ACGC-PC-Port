@@ -58,6 +58,18 @@ pacman -S mingw-w64-i686-gcc mingw-w64-i686-cmake mingw-w64-i686-SDL2 mingw-w64-
    pc/build32/bin/AnimalCrossing.exe
    ```
 
+## Flatpak
+
+A manifest is provided in `flatpak/`. From the repository root:
+
+```bash
+flatpak-builder --force-clean --user --install-deps-from=flathub --repo=flatpak-repo flatpak-build flatpak/io.github.flyngmt.ACGCPCPort.yml
+flatpak build-bundle --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo flatpak-repo AnimalCrossingPCPort.flatpak io.github.flyngmt.ACGCPCPort
+flatpak install --user AnimalCrossingPCPort.flatpak
+```
+
+Place your disc image in `~/.var/app/io.github.flyngmt.ACGCPCPort/data/acgc-pc-port/rom/`. Saves and settings live in the same folder.
+
 ## Controls
 
 Keyboard bindings are customizable via `keybindings.ini` (next to the executable). Mouse buttons (Mouse1/Mouse2/Mouse3) can also be assigned.

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.flyngmt.ACGCPCPort</id>
+  <name>Animal Crossing PC Port</name>
+  <summary>Native PC port of Animal Crossing (GameCube)</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>CC0-1.0 AND MIT</project_license>
+  <description>
+    <p>A native port of Animal Crossing (GameCube) built on the ac-decomp decompilation project, with the GX graphics API translated to OpenGL 3.3.</p>
+    <p>No game data is included. Place your own USA (GAFE01_00) disc image (.ciso, .iso or .gcm) in ~/.var/app/io.github.flyngmt.ACGCPCPort/data/acgc-pc-port/rom/ before starting.</p>
+  </description>
+  <launchable type="desktop-id">io.github.flyngmt.ACGCPCPort.desktop</launchable>
+  <url type="homepage">https://github.com/flyngmt/ACGC-PC-Port</url>
+  <url type="bugtracker">https://github.com/flyngmt/ACGC-PC-Port/issues</url>
+  <categories>
+    <category>Game</category>
+  </categories>
+  <supports>
+    <control>keyboard</control>
+    <control>gamepad</control>
+  </supports>
+  <content_rating type="oars-1.1"/>
+</component>
