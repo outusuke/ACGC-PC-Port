@@ -429,6 +429,8 @@ if(WIN32)
 else()
     find_package(OpenGL REQUIRED)
     target_link_libraries(ac_pc OpenGL::GL dl pthread m)
+    # The decomp's global operator new would otherwise replace the allocator inside Mesa/LLVM.
+    target_link_options(ac_pc PRIVATE "-Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/cmake/hide-symbols.ver")
 endif()
 
 set_target_properties(ac_pc PROPERTIES
