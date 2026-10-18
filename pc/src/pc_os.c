@@ -234,11 +234,13 @@ void LCDisable(void) {}
 /* --- Init --- */
 void OSInit(void) {
     if (!arena_memory) {
-        arena_memory = (u8*)malloc(PC_MAIN_MEMORY_SIZE);
-        if (!arena_memory) {
+        /* JW_Init's heap size slack assumes a 32-byte aligned arena like the GC's */
+        u8* raw = (u8*)malloc(PC_MAIN_MEMORY_SIZE + 32);
+        if (!raw) {
             fprintf(stderr, "Failed to allocate main memory arena\n");
             exit(1);
         }
+        arena_memory = (u8*)(((uintptr_t)raw + 31) & ~(uintptr_t)31);
         memset(arena_memory, 0, PC_MAIN_MEMORY_SIZE);
 
         /* GC system info at phys addr 0; offset 0x28 = mem size for JKRHeap */
