@@ -12,15 +12,21 @@ Supported versions: GAFE01_00: Rev 0 (USA)
 
 Pre-built releases are available on the [Releases](https://github.com/flyngmt/ACGC-PC-Port/releases) page. No build tools required.
 
+**Windows**
+
 1. Download and extract the latest release zip
 2. Place your disc image in the `rom/` folder
 3. Run `AnimalCrossing.exe`
 
+**Linux**
+
+Download `AnimalCrossingPCPort-x86_64.flatpak` and follow the [Linux](#linux) section.
+
 The game reads all assets directly from the disc image at startup. No extraction or preprocessing step is needed.
 
-## Building from Source
+## Building from Source (Windows)
 
-Only needed if you want to modify the code. Otherwise, use the [pre-built release](https://github.com/flyngmt/ACGC-PC-Port/releases) above.
+Only needed if you want to modify the code. Otherwise, use the [pre-built release](https://github.com/flyngmt/ACGC-PC-Port/releases) above. Linux is covered [below](#linux).
 
 ### Requirements
 
@@ -58,9 +64,20 @@ pacman -S mingw-w64-i686-gcc mingw-w64-i686-cmake mingw-w64-i686-SDL2 mingw-w64-
    pc/build32/bin/AnimalCrossing.exe
    ```
 
-## Flatpak
+## Linux
 
-A manifest is provided in `flatpak/`. From the repository root:
+The game has to be built as a 32-bit executable, so on Linux it needs 32-bit (i386) libraries. You can either use the Flatpak, which brings those libraries with it, or build natively.
+
+### Flatpak
+
+Install the bundle from the [Releases](https://github.com/flyngmt/ACGC-PC-Port/releases) page (the Flathub remote must be set up so the runtime can be fetched):
+
+```bash
+flatpak install --user AnimalCrossingPCPort-x86_64.flatpak
+flatpak run io.github.flyngmt.ACGCPCPort
+```
+
+To build the bundle yourself, run this from the repository root:
 
 ```bash
 flatpak-builder --force-clean --user --install-deps-from=flathub --repo=flatpak-repo flatpak-build flatpak/io.github.flyngmt.ACGCPCPort.yml
@@ -69,6 +86,34 @@ flatpak install --user AnimalCrossingPCPort.flatpak
 ```
 
 Place your disc image in `~/.var/app/io.github.flyngmt.ACGCPCPort/data/acgc-pc-port/rom/`. Saves and settings live in the same folder.
+
+### Native build
+
+Install a 32-bit toolchain plus 32-bit SDL2 and OpenGL development packages.
+
+Fedora:
+
+```bash
+sudo dnf install gcc gcc-c++ cmake make glibc-devel.i686 libstdc++-devel.i686 SDL2-devel.i686 mesa-libGL-devel.i686
+```
+
+Debian / Ubuntu:
+
+```bash
+sudo apt install gcc-multilib g++-multilib cmake make libsdl2-dev:i386 libgl-dev:i386
+```
+
+Then, from the repository root:
+
+```bash
+cmake -S pc -B pc/build32 -DCMAKE_C_FLAGS=-m32 -DCMAKE_CXX_FLAGS=-m32
+cmake --build pc/build32 -j"$(nproc)"
+mkdir -p pc/build32/bin/rom
+cp /path/to/YourGame.iso pc/build32/bin/rom/
+cd pc/build32/bin && ./AnimalCrossing
+```
+
+Run it from `pc/build32/bin`: `rom/`, `save/`, `shaders/` and `settings.ini` are resolved relative to the working directory.
 
 ## Controls
 

@@ -23,9 +23,9 @@ onto that would be a likely security nightmare.
 
 ## Does it work on Linux / Steam Deck?
 
-The Windows binary runs under Proton/Wine and seems to work fine from what I've
-heard. Native Linux is not officially supported yet, hopefully will happen in the
-future.
+Yes, there is a native Linux build, either as a Flatpak or built from source. See
+the [Linux section of the README](README.md#linux). The Windows binary also runs under
+Proton/Wine and seems to work fine from what I've heard.
 
 ## Is this vibecoded?
 

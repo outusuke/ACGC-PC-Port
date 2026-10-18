@@ -1,0 +1,33 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  flatpak:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-25.08
+      options: --privileged
+    steps:
+      - uses: actions/checkout@v4
+      - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+        with:
+          bundle: AnimalCrossingPCPort.flatpak
+          manifest-path: flatpak/io.github.flyngmt.ACGCPCPort.yml
+      - name: Name the bundle
+        run: |
+          bundle=$(find . -maxdepth 2 -name '*.flatpak' | head -n 1)
+          test -n "$bundle"
+          [ "$bundle" = ./AnimalCrossingPCPort-x86_64.flatpak ] || mv "$bundle" AnimalCrossingPCPort-x86_64.flatpak
+          sha256sum AnimalCrossingPCPort-x86_64.flatpak > AnimalCrossingPCPort-x86_64.flatpak.sha256
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            AnimalCrossingPCPort-x86_64.flatpak
+            AnimalCrossingPCPort-x86_64.flatpak.sha256
+          generate_release_notes: true
