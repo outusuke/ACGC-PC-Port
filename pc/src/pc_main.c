@@ -357,24 +357,23 @@ int main(int argc, char* argv[]) {
     }
 #else
     {
-        Dl_info dl;
-        if (dladdr((void*)main, &dl) && dl.dli_fbase) {
-            pc_image_base = (unsigned int)(uintptr_t)dl.dli_fbase;
-            Elf32_Ehdr* ehdr = (Elf32_Ehdr*)dl.dli_fbase;
-            Elf32_Phdr* phdr = (Elf32_Phdr*)((char*)dl.dli_fbase + ehdr->e_phoff);
-            unsigned int max_end = 0;
-            for (int i = 0; i < ehdr->e_phnum; i++) {
-                if (phdr[i].p_type == PT_LOAD) {
-                    unsigned int seg_end = phdr[i].p_vaddr + phdr[i].p_memsz;
-                    if (seg_end > max_end) max_end = seg_end;
-                }
+        /* linker-provided; avoids dladdr, which needs _GNU_SOURCE and clashes with the decomp headers */
+        extern const Elf32_Ehdr __ehdr_start;
+        const Elf32_Ehdr* ehdr = &__ehdr_start;
+        const Elf32_Phdr* phdr = (const Elf32_Phdr*)((const char*)ehdr + ehdr->e_phoff);
+        pc_image_base = (unsigned int)(uintptr_t)ehdr;
+        unsigned int max_end = 0;
+        for (int i = 0; i < ehdr->e_phnum; i++) {
+            if (phdr[i].p_type == PT_LOAD) {
+                unsigned int seg_end = phdr[i].p_vaddr + phdr[i].p_memsz;
+                if (seg_end > max_end) max_end = seg_end;
             }
-            /* ET_EXEC: p_vaddr is absolute. ET_DYN (PIE): relative to load address. */
-            if (ehdr->e_type == ET_DYN) {
-                pc_image_end = pc_image_base + max_end;
-            } else {
-                pc_image_end = max_end;
-            }
+        }
+        /* ET_EXEC: p_vaddr is absolute. ET_DYN (PIE): relative to load address. */
+        if (ehdr->e_type == ET_DYN) {
+            pc_image_end = pc_image_base + max_end;
+        } else {
+            pc_image_end = max_end;
         }
     }
 #endif

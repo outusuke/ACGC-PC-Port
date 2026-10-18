@@ -51,9 +51,8 @@ extern "C" {
 
 #ifdef TARGET_PC
 /* 'errno' is a macro on PC (from <errno.h>), rename the struct member */
-#ifdef errno
+#include <errno.h>
 #undef errno
-#endif
 typedef struct {
     u16 type;
     u8 status;
@@ -66,8 +65,6 @@ typedef struct {
     /* 0x03 */ s8 stick_y;
     /* 0x04 */ u8 errno;
 } OSContPad;
-/* Restore errno macro */
-#include <errno.h>
 #else
 
 typedef struct {
