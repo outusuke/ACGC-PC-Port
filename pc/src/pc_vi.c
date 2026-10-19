@@ -69,13 +69,17 @@ void VIWaitForRetrace(void) {
     Uint64 t_before_pace_prof = pc_profiler_begin_timer();
     {
         extern int g_pc_nes_active;
-        int pace_frame = g_pc_nes_active || g_frame_limiter > 0;
+        int pace_frame = !g_pc_no_framelimit && (g_pc_nes_active || g_frame_limiter > 0);
         int pace_us = 0;
 
         if (g_pc_nes_active) {
             pace_us = 16667;
         } else if (g_frame_limiter > 0) {
             pace_us = (int)((1.0 / (double)g_frame_limiter) * 1000000);
+        }
+
+        if (g_pc_fast_forward) {
+            pace_us /= 2;
         }
 
         if (pace_frame) {
@@ -94,6 +98,8 @@ void VIWaitForRetrace(void) {
                     now = SDL_GetPerformanceCounter();
                     elapsed_us = (now - frame_start_time) * 1000000 / perf_freq;
                 }
+                now = SDL_GetPerformanceCounter();
+                elapsed_us = (now - frame_start_time) * 1000000 / perf_freq;
             }
         }
     }
@@ -125,8 +131,9 @@ void VIWaitForRetrace(void) {
             Uint64 now = SDL_GetPerformanceCounter();
             double secs = (double)(now - fps_start) / (double)perf_freq;
             double fps = (double)fps_count / secs;
-            char title[64];
-            snprintf(title, sizeof(title), "Animal Crossing - %.1f FPS", fps);
+            char title[80];
+            snprintf(title, sizeof(title), "Animal Crossing - %.1f FPS%s", fps,
+                     g_pc_fast_forward ? " [2x]" : "");
             SDL_SetWindowTitle(g_pc_window, title);
             fps_start = now;
             fps_count = 0;
