@@ -23,6 +23,7 @@ cleanup:
 modules:
   - name: SDL2
     buildsystem: cmake-ninja
+    builddir: true
     config-opts:
       - -DCMAKE_BUILD_TYPE=Release
       - -DSDL_STATIC=OFF
@@ -48,3 +49,6 @@ modules:
         path: ..
         skip:
           - .git
+          - .flatpak-builder
+          - flatpak_app
+          - repo
