@@ -1,0 +1,21 @@
+name: Flatpak
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  flatpak:
+    name: Flatpak-x86_64
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-25.08
+      options: --privileged
+    steps:
+      - uses: actions/checkout@v6
+      - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+        with:
+          bundle: AnimalCrossing.flatpak
+          manifest-path: flatpak/io.github.outusuke.ACGCPCPort.yml
+          cache-key: flatpak-builder-${{ github.sha }}
+          arch: x86_64
