@@ -3,6 +3,10 @@ name: Flatpak
 on:
   push:
   workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag to publish a release for, e.g. v1.0.0 (empty to only build)
+        required: false
 
 jobs:
   flatpak:
@@ -19,3 +23,19 @@ jobs:
           manifest-path: flatpak/io.github.outusuke.ACGCPCPort.yml
           cache-key: flatpak-builder-${{ github.sha }}
           arch: x86_64
+
+  release:
+    needs: flatpak
+    if: inputs.tag != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          path: dist
+          merge-multiple: true
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+        run: gh release create "$TAG" dist/*.flatpak --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "$TAG" --generate-notes
