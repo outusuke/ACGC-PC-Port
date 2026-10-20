@@ -344,12 +344,26 @@ static void* initialMenuStack;
 static OSMessage commandMsgBuf[2];
 static OSMessage statusMsgBuf[1];
 
+#ifdef TARGET_PC
+static int recv_mesg_u32(OSMessageQueue* mq, u32* out, int flags) {
+  OSMessage mesg = NULL;
+  int res = osRecvMesg(mq, &mesg, flags);
+
+  if (!res) {
+    *out = (u32)(uintptr_t)mesg;
+  }
+  return res;
+}
+#else
+#define recv_mesg_u32(mq, out, flags) osRecvMesg(mq, (OSMessage*)(out), flags)
+#endif
+
 extern void proc(void* arg) {
   u32 msg;
   int proc_done;
   OSTimer timer;
 
-  osRecvMesg(&commandQ, (OSMessage*)&msg, OS_MESSAGE_BLOCK);
+  recv_mesg_u32(&commandQ, &msg, OS_MESSAGE_BLOCK);
   progressive_mode = FALSE;
   fadeout_step = 0;
   menu_step = 0;
@@ -370,7 +384,7 @@ extern void proc(void* arg) {
       }
     }
 
-    if (!osRecvMesg(&commandQ, (OSMessage*)&msg, OS_MESSAGE_NOBLOCK)) {
+    if (!recv_mesg_u32(&commandQ, &msg, OS_MESSAGE_NOBLOCK)) {
       if (msg == INITIAL_MENU_OSMESG_FADEOUT_STEP) {
         fadeout_step = 2;
       }

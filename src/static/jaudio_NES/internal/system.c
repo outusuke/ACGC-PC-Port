@@ -17,6 +17,20 @@
 #include <string.h>
 #endif
 
+#ifdef TARGET_PC
+static s32 recv_mesg_u32(OSMesgQueue* mq, u32* out, s32 flags) {
+    OSMesg msg = NULL;
+    s32 res = Z_osRecvMesg(mq, &msg, flags);
+
+    if (res != -1) {
+        *out = (u32)(uintptr_t)msg;
+    }
+    return res;
+}
+#else
+#define recv_mesg_u32(mq, out, flags) Z_osRecvMesg(mq, (OSMesg*)(out), flags)
+#endif
+
 #define MK_BGLOAD_MSG(retData, tableType, id, loadStatus) \
     (((retData) << 24) | ((tableType) << 16) | ((id) << 8) | (loadStatus))
 #define BGLOAD_TBLTYPE(v) ((v >> 16) & 0xFF)
@@ -2839,12 +2853,12 @@ s32 Nas_CheckBgWave(s32 reset_status) {
 
     if (AG.num_requested_samples > 0) {
         if (reset_status != 0) {
-            Z_osRecvMesg(&AG.preload_sample_queue, (OSMesg*)&preload_idx, OS_MESG_NOBLOCK);
+            recv_mesg_u32(&AG.preload_sample_queue, &preload_idx, OS_MESG_NOBLOCK);
             AG.num_requested_samples = 0;
             return FALSE;
         }
 
-        if (Z_osRecvMesg(&AG.preload_sample_queue, (OSMesg*)&preload_idx, OS_MESG_NOBLOCK) == -1) {
+        if (recv_mesg_u32(&AG.preload_sample_queue, &preload_idx, OS_MESG_NOBLOCK) == -1) {
             return FALSE;
         }
 
@@ -3106,7 +3120,7 @@ void MK_FrameWork(void) {
     u32 ret;
     u8* rmes;
 
-    if (Z_osRecvMesg(&MK_QUEUE, (OSMesg*)&ret, OS_MESG_NOBLOCK) != -1) {
+    if (recv_mesg_u32(&MK_QUEUE, &ret, OS_MESG_NOBLOCK) != -1) {
         idx = ret >> 24;
         rmes = MK_RMES[idx];
         if (rmes != NULL) {
