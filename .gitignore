@@ -48,3 +48,8 @@ temp/
 include/PR/
 include/gcc/
 include/compiler/gcc/stdlib.h
+
+android/third_party/
+android/.gradle/
+android/local.properties
+android/app/build/

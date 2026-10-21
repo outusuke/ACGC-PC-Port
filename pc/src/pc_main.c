@@ -14,6 +14,9 @@
 #include "pc_settings_menu.h"
 #include "pc_profiler.h"
 #include "m_kankyo.h"
+#ifdef TARGET_ANDROID
+#include "pc_android.h"
+#endif
 
 /* prefer discrete GPU on laptops */
 #ifdef _WIN32
@@ -121,14 +124,23 @@ void pc_platform_init(void) {
     SetProcessDPIAware();
     SDL_SetHint(SDL_HINT_WINDOWS_INTRESOURCE_ICON, "1");
 #endif
+#ifdef TARGET_ANDROID
+    SDL_SetHint(SDL_HINT_ANDROID_TRAP_BACK_BUTTON, "1");
+#endif
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER | SDL_INIT_AUDIO | SDL_INIT_TIMER) < 0) {
         fprintf(stderr, "SDL_Init failed: %s\n", SDL_GetError());
         exit(1);
     }
 
+#ifdef TARGET_ANDROID
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+#else
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+#endif
 #ifdef __APPLE__
     /* macOS requires forward-compatible flag for Core Profile contexts */
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
@@ -147,6 +159,9 @@ void pc_platform_init(void) {
         Uint32 flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
         int win_w = g_pc_settings.window_width;
         int win_h = g_pc_settings.window_height;
+#ifdef TARGET_ANDROID
+        flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
+#endif
         if (g_pc_settings.fullscreen == 1) {
             flags |= SDL_WINDOW_FULLSCREEN;
         } else if (g_pc_settings.fullscreen == 2) {
@@ -172,6 +187,7 @@ void pc_platform_init(void) {
         exit(1);
     }
 
+#ifndef TARGET_ANDROID
     if (!gladLoadGL((GLADloadfunc)SDL_GL_GetProcAddress)) {
         fprintf(stderr, "gladLoadGL failed\n");
         SDL_GL_DeleteContext(g_pc_gl_context);
@@ -179,6 +195,7 @@ void pc_platform_init(void) {
         SDL_Quit();
         exit(1);
     }
+#endif
 
     if (g_pc_verbose) {
         const char* vendor = (const char*)glGetString(GL_VENDOR);
@@ -215,9 +232,11 @@ void pc_platform_init(void) {
     pc_platform_update_window_size();
 
 #ifdef PC_ENHANCEMENTS
+#ifndef TARGET_ANDROID
     if (g_pc_settings.msaa > 0) {
         glEnable(GL_MULTISAMPLE);
     }
+#endif
 #endif
 
     pc_gx_init();
@@ -308,6 +327,12 @@ int pc_platform_poll_events(void) {
                 }
                 break;
             case SDL_KEYDOWN:
+#ifdef TARGET_ANDROID
+                if (event.key.keysym.sym == SDLK_AC_BACK) {
+                    event.key.keysym.sym = SDLK_ESCAPE;
+                    event.key.keysym.scancode = SDL_SCANCODE_ESCAPE;
+                }
+#endif
                 /* Keybinding capture eats all input first (works from both
                  * the pause menu and the title Options menu). */
                 if (pc_settings_menu_capture_active()) {
@@ -394,6 +419,9 @@ static int pc_parse_rain_intensity(const char* text) {
 }
 
 int main(int argc, char* argv[]) {
+#ifdef TARGET_ANDROID
+    pc_android_init();
+#endif
 #ifndef _WIN32
     /* prefer discrete GPU on Linux (NVIDIA PRIME and AMD) while respecting user overrides */
     setenv("__NV_PRIME_RENDER_OFFLOAD", "1", 0);
@@ -495,6 +523,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
+#ifndef TARGET_ANDROID
     /* Redirect stdout/stderr to NUL unless verbose — unbuffered terminal writes
      * are extremely slow on Windows and tank FPS. */
     if (!g_pc_verbose && !g_pc_profile_enabled) {
@@ -509,6 +538,7 @@ int main(int argc, char* argv[]) {
         setvbuf(stdout, NULL, _IONBF, 0);
         setvbuf(stderr, NULL, _IONBF, 0);
     }
+#endif
 
     /* exe image range for seg2k0 — BSS can overlap N64 segment addresses */
 #ifdef _WIN32

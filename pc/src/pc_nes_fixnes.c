@@ -394,8 +394,21 @@ void pc_fixnes_render_frame(uint16_t *fb) {
      * Skip top 8 rows (often garbage), show 224 lines. */
     glBindTexture(GL_TEXTURE_2D, fixnes_texture);
     if (g_pc_profile_enabled) pc_profiler_add_count_texture_bind_slow();
+#ifdef TARGET_ANDROID
+    {
+        static uint16_t rgb565[256 * 224];
+        const uint16_t* src = fb + 256 * 8;
+
+        /* GLES lacks the _REV type, so swap R and B on the CPU. */
+        for (int i = 0; i < 256 * 224; i++) {
+            rgb565[i] = (uint16_t)((src[i] << 11) | (src[i] & 0x07E0) | (src[i] >> 11));
+        }
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 256, 224, 0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, rgb565);
+    }
+#else
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 256, 224, 0,
                  GL_RGB, GL_UNSIGNED_SHORT_5_6_5_REV, fb + 256 * 8);
+#endif
 
     /* 0 = stretch to window, 1 = centered 4:3 with pillar/letterbox. */
     int win_w = g_pc_window_w;

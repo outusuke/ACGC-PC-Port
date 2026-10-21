@@ -4,6 +4,9 @@
 #include "pc_keybindings.h"
 #include "pc_settings.h"
 #include <dolphin/pad.h>
+#ifdef TARGET_ANDROID
+#include "pc_android.h"
+#endif
 
 /* analog stick constants */
 #define STICK_MAGNITUDE     80
@@ -170,6 +173,9 @@ u32 PADRead(PADStatus* status) {
     status[0].substickX = cstickX;
     status[0].substickY = cstickY;
     status[0].err = 0; /* PAD_ERR_NONE */
+#ifdef TARGET_ANDROID
+    pc_android_apply_touch(&status[0]);
+#endif
 
     return PAD_CHAN0_BIT; /* Controller 1 connected */
 }

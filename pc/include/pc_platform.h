@@ -4,7 +4,9 @@
 
 #include <stdint.h>
 
+#ifndef TARGET_ANDROID
 #define SDL_MAIN_HANDLED
+#endif
 #include <SDL.h>
 #include <glad/gl.h>
 
