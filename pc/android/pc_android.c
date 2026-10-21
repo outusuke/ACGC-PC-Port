@@ -174,11 +174,14 @@ static void start_log_bridge(void) {
 }
 
 void pc_android_init(void) {
-    const char* dir = SDL_AndroidGetInternalStoragePath();
+    const char* dir = getenv("ACGC_DATA_DIR");
 
     start_log_bridge();
+    if (!dir) {
+        dir = SDL_AndroidGetInternalStoragePath();
+    }
     if (!dir || chdir(dir) != 0) {
-        fprintf(stderr, "[Android] could not enter internal storage\n");
+        fprintf(stderr, "[Android] could not enter data dir\n");
         return;
     }
 

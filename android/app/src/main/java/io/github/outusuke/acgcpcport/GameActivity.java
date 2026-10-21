@@ -30,7 +30,7 @@ public class GameActivity extends SDLActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         copyShaders();
-        exportLogDir();
+        exportDataDir();
         super.onCreate(savedInstanceState);
         limitRenderResolution();
         lockRefreshRate();
@@ -111,25 +111,28 @@ public class GameActivity extends SDLActivity {
         }
     }
 
-    // Android/media/<package> is writable without a storage permission
-    private void exportLogDir() {
-        if (!logEnabled(this)) {
-            return;
-        }
-        File[] dirs = getExternalMediaDirs();
-        if (dirs.length == 0 || dirs[0] == null) {
-            return;
-        }
-        dirs[0].mkdirs();
+    // Android/media/<package> is browsable and writable without a storage permission
+    static File dataDir(Context ctx) {
+        File[] dirs = ctx.getExternalMediaDirs();
+        File dir = dirs.length > 0 && dirs[0] != null ? dirs[0] : ctx.getFilesDir();
+        dir.mkdirs();
+        return dir;
+    }
+
+    private void exportDataDir() {
+        String dir = dataDir(this).getAbsolutePath();
         try {
-            Os.setenv("ACGC_LOG_DIR", dirs[0].getAbsolutePath(), true);
+            Os.setenv("ACGC_DATA_DIR", dir, true);
+            if (logEnabled(this)) {
+                Os.setenv("ACGC_LOG_DIR", dir, true);
+            }
         } catch (ErrnoException e) {
-            Log.e(TAG, "log dir setenv failed", e);
+            Log.e(TAG, "data dir setenv failed", e);
         }
     }
 
     private void copyShaders() {
-        File dir = new File(getFilesDir(), "shaders");
+        File dir = new File(dataDir(this), "shaders");
         dir.mkdirs();
         try {
             for (String name : getAssets().list("shaders")) {

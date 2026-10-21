@@ -80,7 +80,7 @@ public class LauncherActivity extends Activity {
     }
 
     private File romDir() {
-        File dir = new File(getFilesDir(), "rom");
+        File dir = new File(GameActivity.dataDir(this), "rom");
         dir.mkdirs();
         return dir;
     }
