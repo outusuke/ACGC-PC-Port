@@ -6,3 +6,8 @@ Exec=ac-pc-port
 Icon=io.github.outusuke.ACGCPCPort
 Categories=Game;
 Terminal=false
+Actions=verbose;
+
+[Desktop Action verbose]
+Name=Run with verbose log
+Exec=ac-pc-port --verbose
