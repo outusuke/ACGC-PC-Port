@@ -24,9 +24,10 @@ static s64 gc_epoch_offset_ticks = 0; /* Ticks from GC epoch to program start */
 #define GC_UNIX_EPOCH_DIFF 946684800LL
 
 s64 osGetTime(void) {
-    u64 now = SDL_GetPerformanceCounter();
     u64 freq = SDL_GetPerformanceFrequency();
-    s64 elapsed = (s64)((now - time_base_start) * (u64)GC_TIMER_CLOCK / freq);
+    u64 ticks = SDL_GetPerformanceCounter() - time_base_start;
+    /* split into seconds + remainder so ticks * GC_TIMER_CLOCK can't overflow u64 */
+    s64 elapsed = (s64)((ticks / freq) * GC_TIMER_CLOCK + (ticks % freq) * GC_TIMER_CLOCK / freq);
     return gc_epoch_offset_ticks + elapsed;
 }
 

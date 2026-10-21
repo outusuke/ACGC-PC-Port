@@ -3,6 +3,8 @@ package io.github.outusuke.acgcpcport;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
+import android.system.ErrnoException;
+import android.system.Os;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.InputDevice;
@@ -28,6 +30,7 @@ public class GameActivity extends SDLActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         copyShaders();
+        exportLogDir();
         super.onCreate(savedInstanceState);
         limitRenderResolution();
         lockRefreshRate();
@@ -97,6 +100,20 @@ public class GameActivity extends SDLActivity {
                 public void surfaceDestroyed(SurfaceHolder holder) {
                 }
             });
+        }
+    }
+
+    // Android/media/<package> is writable without a storage permission
+    private void exportLogDir() {
+        File[] dirs = getExternalMediaDirs();
+        if (dirs.length == 0 || dirs[0] == null) {
+            return;
+        }
+        dirs[0].mkdirs();
+        try {
+            Os.setenv("ACGC_LOG_DIR", dirs[0].getAbsolutePath(), true);
+        } catch (ErrnoException e) {
+            Log.e(TAG, "log dir setenv failed", e);
         }
     }
 

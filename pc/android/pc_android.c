@@ -17,6 +17,13 @@
 
 #define LOG_TAG "ACGC"
 
+extern int g_pc_verbose;
+
+typedef struct {
+    int fd;
+    FILE* file;
+} LogSink;
+
 static _Atomic uint64_t s_touch;
 
 JNIEXPORT void JNICALL Java_io_github_outusuke_acgcpcport_TouchControlsView_nativeSetPad(
@@ -92,7 +99,8 @@ void pc_android_shader_source(GLuint shader, GLsizei count, const GLchar* const*
 }
 
 static void* log_thread(void* arg) {
-    int fd = (int)(intptr_t)arg;
+    LogSink* sink = arg;
+    int fd = sink->fd;
     char buf[1024];
     size_t len = 0;
     ssize_t n;
@@ -101,6 +109,10 @@ static void* log_thread(void* arg) {
         char* start = buf;
         char* nl;
 
+        if (sink->file) {
+            fwrite(buf + len, 1, (size_t)n, sink->file);
+            fflush(sink->file);
+        }
         len += (size_t)n;
         buf[len] = '\0';
         while ((nl = strchr(start, '\n')) != NULL) {
@@ -118,20 +130,47 @@ static void* log_thread(void* arg) {
     return NULL;
 }
 
-static void start_log_bridge(void) {
+static void bridge_fd(int target, FILE* file) {
     int fds[2];
     pthread_t thread;
+    LogSink* sink;
 
     if (pipe(fds) != 0) {
         return;
     }
+    sink = malloc(sizeof(*sink));
+    if (!sink) {
+        close(fds[0]);
+        close(fds[1]);
+        return;
+    }
+    sink->fd = fds[0];
+    sink->file = file;
+    dup2(fds[1], target);
+    close(fds[1]);
+    pthread_create(&thread, NULL, log_thread, sink);
+    pthread_detach(thread);
+}
+
+static FILE* open_log(const char* dir, const char* name) {
+    char path[512];
+
+    snprintf(path, sizeof(path), "%s/%s", dir, name);
+    return fopen(path, "w");
+}
+
+static void start_log_bridge(void) {
+    const char* dir = getenv("ACGC_LOG_DIR");
+    FILE* out = dir ? open_log(dir, "stdout.log") : NULL;
+    FILE* err = dir ? open_log(dir, "stderr.log") : NULL;
+
+    if (out || err) {
+        g_pc_verbose = 1;
+    }
     setvbuf(stdout, NULL, _IOLBF, 0);
     setvbuf(stderr, NULL, _IONBF, 0);
-    dup2(fds[1], STDOUT_FILENO);
-    dup2(fds[1], STDERR_FILENO);
-    close(fds[1]);
-    pthread_create(&thread, NULL, log_thread, (void*)(intptr_t)fds[0]);
-    pthread_detach(thread);
+    bridge_fd(STDOUT_FILENO, out);
+    bridge_fd(STDERR_FILENO, err);
 }
 
 void pc_android_init(void) {
