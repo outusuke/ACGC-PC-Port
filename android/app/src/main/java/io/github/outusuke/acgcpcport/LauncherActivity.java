@@ -25,6 +25,7 @@ public class LauncherActivity extends Activity {
     private Button play;
     private Button select;
     private Button graphics;
+    private Button log;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +55,12 @@ public class LauncherActivity extends Activity {
             refresh();
         });
 
+        log = new Button(this);
+        log.setOnClickListener(v -> {
+            GameActivity.setLogEnabled(this, !GameActivity.logEnabled(this));
+            refresh();
+        });
+
         play = new Button(this);
         play.setText("Play");
         play.setOnClickListener(v -> startActivity(new Intent(this, GameActivity.class)));
@@ -61,6 +68,7 @@ public class LauncherActivity extends Activity {
         root.addView(status);
         root.addView(select);
         root.addView(graphics);
+        root.addView(log);
         root.addView(play);
         setContentView(root);
     }
@@ -95,6 +103,7 @@ public class LauncherActivity extends Activity {
         }
         int height = GameActivity.renderHeight(this);
         graphics.setText(height > 0 ? "Render resolution: " + height + "p" : "Render resolution: native");
+        log.setText(GameActivity.logEnabled(this) ? "Logging: on" : "Logging: off");
         play.setEnabled(found != null);
         status.setText(found != null ? "Disc image: " + found : "Select your Animal Crossing (GAFE01) disc image");
     }

@@ -49,6 +49,14 @@ public class GameActivity extends SDLActivity {
         ctx.getSharedPreferences("video", MODE_PRIVATE).edit().putInt("render_height", height).apply();
     }
 
+    static boolean logEnabled(Context ctx) {
+        return ctx.getSharedPreferences("debug", MODE_PRIVATE).getBoolean("log_enabled", false);
+    }
+
+    static void setLogEnabled(Context ctx, boolean enabled) {
+        ctx.getSharedPreferences("debug", MODE_PRIVATE).edit().putBoolean("log_enabled", enabled).apply();
+    }
+
     static int nextRenderHeight(int current) {
         for (int i = 0; i < RENDER_HEIGHTS.length; i++) {
             if (RENDER_HEIGHTS[i] == current) {
@@ -105,6 +113,9 @@ public class GameActivity extends SDLActivity {
 
     // Android/media/<package> is writable without a storage permission
     private void exportLogDir() {
+        if (!logEnabled(this)) {
+            return;
+        }
         File[] dirs = getExternalMediaDirs();
         if (dirs.length == 0 || dirs[0] == null) {
             return;
