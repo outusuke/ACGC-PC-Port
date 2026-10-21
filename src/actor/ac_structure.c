@@ -26,7 +26,8 @@ static u8 aSTR_overlay[aSTR_ACTOR_TBL_COUNT][aSTR_OVERLAY_SIZE];
 #ifdef TARGET_PC
 /* Structure profiles such as TOUDAI_ACTOR are larger than STRUCTURE_ACTOR because of Delta time. 
  * If you are modding, be careful to not make the same mistake. */
-#define aSTR_PC_ACTOR_SLOT_SIZE 0x300
+/* sized for SHRINE_ACTOR */
+#define aSTR_PC_ACTOR_SLOT_SIZE 0x360
 
 typedef union {
     u64 align;

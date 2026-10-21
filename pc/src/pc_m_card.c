@@ -69,9 +69,13 @@ static int pc_save_ready = 0;
 /* --- Travel state --- */
 static Save l_keepSave;                        /* Other town's save data (for Card B visit) */
 static int l_keepSave_set = FALSE;
-static mCD_keep_mail_c l_keepMail;             /* Other town's mail ARAM block */
-static mCD_keep_original_c l_keepOriginal;     /* Other town's original designs ARAM block */
-static mCD_keep_diary_c l_keepDiary;           /* Other town's diary ARAM block */
+/* ATTRIBUTE_ALIGN doesn't pad on PC; size to the aligned ARAM block (mail copy overran sizeof by 28 bytes) */
+static union { mCD_keep_mail_c data; u8 raw[mCD_KEEP_MAIL_SIZE]; } l_keepMail_buf;
+static union { mCD_keep_original_c data; u8 raw[mCD_KEEP_ORIGINAL_SIZE]; } l_keepOriginal_buf;
+static union { mCD_keep_diary_c data; u8 raw[mCD_KEEP_DIARY_SIZE]; } l_keepDiary_buf;
+#define l_keepMail l_keepMail_buf.data
+#define l_keepOriginal l_keepOriginal_buf.data
+#define l_keepDiary l_keepDiary_buf.data
 
 /* Passport: the traveling player's private data + departing animal */
 static union {
