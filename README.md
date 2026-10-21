@@ -187,6 +187,14 @@ Save files are stored in the `save/` folder next to the executable, using the st
 
 This project would not be possible without the work of the [ACreTeam](https://github.com/ACreTeam) decompilation team. Their complete C decompilation of Animal Crossing is the foundation this port is built on.
 
+This fork builds on the PC port by [FlyingMeta](https://github.com/flyngmt/ACGC-PC-Port) and on the community work in [PR #48 "Full 64-bit migration"](https://github.com/flyngmt/ACGC-PC-Port/pull/48), which is included here:
+
+- [chasem-dev](https://github.com/chasem-dev/ACGC-PC-Port) (Chase Myers): the original 64-bit port (macOS ARM64 and Linux x86_64), including the 16-byte `Gfx` widening, 64-bit audio bank relocation, the DVD and RARC structure fixes, font rendering fixes and the F4 fast-forward toggle.
+- Marco Andronaco: further 64-bit and Linux i686 fixes, the gyroid audio crash fixes, NES emulation and the build workflows.
+- [JPikachu](https://github.com/JPikachu): the software BC7 decoder that makes custom textures load on macOS.
+- Richard Geldreich, Jr. ([bc7decomp](https://github.com/richgel999/bc7enc16), MIT or public domain): the BC7 decoder used by the above.
+- [FIX94](https://github.com/FIX94/fixNES): FixNES, the NES emulator used for in-game NES titles (MIT).
+
 ## AI Notice
 
 AI tools such as Claude were used in this project (PC port code only).
