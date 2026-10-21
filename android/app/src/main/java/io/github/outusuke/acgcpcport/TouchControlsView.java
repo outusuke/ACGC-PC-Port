@@ -137,24 +137,24 @@ public class TouchControlsView extends View {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         float u = Math.min(h, w * 0.56f);
-        float cy = h - u * 0.52f;
-        float lx = u * 0.5f;
-        float rx = w - u * 0.5f;
+        float cy = h - u * 0.40f;
+        float lx = u * 0.40f;
+        float rx = w - u * 0.42f;
 
         rim.setStrokeWidth(Math.max(2f, u * 0.006f));
-        leftStick.place(lx, cy, u * 0.24f);
-        dpad.place(polarX(lx, 30f, u * 0.42f), polarY(cy, 30f, u * 0.42f), u * 0.10f);
-        cStick.place(polarX(rx, 235f, u * 0.40f), polarY(cy, 235f, u * 0.40f), u * 0.10f);
+        leftStick.place(lx, cy, u * 0.19f);
+        dpad.place(polarX(lx, -35f, u * 0.33f), polarY(cy, -35f, u * 0.33f), u * 0.08f);
+        cStick.place(polarX(rx, 235f, u * 0.34f), polarY(cy, 235f, u * 0.34f), u * 0.085f);
 
-        place(buttons[0], rx, cy, u * 0.12f);
-        place(buttons[1], polarX(rx, 205f, u * 0.20f), polarY(cy, 205f, u * 0.20f), u * 0.075f);
-        place(buttons[2], polarX(rx, 20f, u * 0.22f), polarY(cy, 20f, u * 0.22f), u * 0.075f);
-        place(buttons[3], polarX(rx, 100f, u * 0.22f), polarY(cy, 100f, u * 0.22f), u * 0.075f);
+        place(buttons[0], rx, cy, u * 0.095f);
+        place(buttons[1], polarX(rx, 205f, u * 0.16f), polarY(cy, 205f, u * 0.16f), u * 0.06f);
+        place(buttons[2], polarX(rx, 20f, u * 0.18f), polarY(cy, 20f, u * 0.18f), u * 0.06f);
+        place(buttons[3], polarX(rx, 100f, u * 0.18f), polarY(cy, 100f, u * 0.18f), u * 0.06f);
 
-        placeBar(buttons[4], polarX(lx, 115f, u * 0.40f), polarY(cy, 115f, u * 0.40f), u * 0.20f, u * 0.10f);
-        placeBar(buttons[5], polarX(rx, 65f, u * 0.42f), polarY(cy, 65f, u * 0.42f), u * 0.20f, u * 0.10f);
-        placeBar(buttons[6], polarX(rx, 105f, u * 0.42f), polarY(cy, 105f, u * 0.42f), u * 0.17f, u * 0.10f);
-        placeBar(buttons[7], polarX(rx, 145f, u * 0.40f), polarY(cy, 145f, u * 0.40f), u * 0.20f, u * 0.09f);
+        placeBar(buttons[4], polarX(lx, 115f, u * 0.33f), polarY(cy, 115f, u * 0.33f), u * 0.17f, u * 0.08f);
+        placeBar(buttons[5], polarX(rx, 65f, u * 0.34f), polarY(cy, 65f, u * 0.34f), u * 0.17f, u * 0.08f);
+        placeBar(buttons[6], polarX(rx, 105f, u * 0.34f), polarY(cy, 105f, u * 0.34f), u * 0.15f, u * 0.08f);
+        placeBar(buttons[7], polarX(rx, 145f, u * 0.34f), polarY(cy, 145f, u * 0.34f), u * 0.15f, u * 0.07f);
     }
 
     private static float polarX(float cx, float degrees, float dist) {

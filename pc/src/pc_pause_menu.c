@@ -12,6 +12,10 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifdef TARGET_ANDROID
+#include "pc_android.h"
+#endif
+
 int g_pc_paused = 0;
 
 /* Pausing is blocked while either is set: main menu (set by ac_animal_logo)
@@ -204,6 +208,33 @@ int pc_pause_menu_handle_event(const SDL_Event* e) {
     }
     return 0;
 }
+
+#ifdef TARGET_ANDROID
+void pc_pause_menu_poll_touch(void) {
+    static int prev_buttons = 0;
+    int buttons, sx, sy;
+    int edge;
+    MenuAction act = ACT_NONE;
+    MenuAction ax, ay;
+
+    pc_android_touch_state(&buttons, &sx, &sy);
+    edge = buttons & ~prev_buttons;
+    prev_buttons = buttons;
+    if (!g_pc_paused) return;
+
+    if (edge & PAD_BUTTON_UP)         act = ACT_UP;
+    else if (edge & PAD_BUTTON_DOWN)  act = ACT_DOWN;
+    else if (edge & PAD_BUTTON_LEFT)  act = ACT_LEFT;
+    else if (edge & PAD_BUTTON_RIGHT) act = ACT_RIGHT;
+    else if (edge & PAD_BUTTON_A)     act = ACT_CONFIRM;
+    else if (edge & (PAD_BUTTON_B | PAD_BUTTON_START)) act = ACT_CANCEL;
+
+    ax = translate_pad_axis(SDL_CONTROLLER_AXIS_LEFTX, sx * 256);
+    ay = translate_pad_axis(SDL_CONTROLLER_AXIS_LEFTY, -sy * 256);
+    if (act == ACT_NONE) act = (ax != ACT_NONE) ? ax : ay;
+    handle_action(act);
+}
+#endif
 
 /* Drawing */
 

@@ -5,5 +5,6 @@
 
 void pc_android_init(void);
 void pc_android_apply_touch(PADStatus* pad);
+void pc_android_touch_state(int* buttons, int* stickX, int* stickY);
 
 #endif

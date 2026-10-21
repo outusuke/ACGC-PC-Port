@@ -54,6 +54,14 @@ void pc_android_apply_touch(PADStatus* pad) {
     }
 }
 
+void pc_android_touch_state(int* buttons, int* stickX, int* stickY) {
+    uint64_t v = atomic_load(&s_touch);
+
+    *buttons = (int)(v & 0xFFFF);
+    *stickX = (s8)((v >> 16) & 0xFF);
+    *stickY = (s8)((v >> 24) & 0xFF);
+}
+
 static const char k_desktop_version[] = "#version 330 core\n";
 static const char k_es_header[] =
     "#version 300 es\n"
