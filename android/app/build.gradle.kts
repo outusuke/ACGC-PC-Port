@@ -8,7 +8,7 @@ if (!sdlDir.exists()) {
 }
 
 val generatedAssets = layout.buildDirectory.dir("generated/assets")
-val generatedRes = layout.buildDirectory.dir("generated/res")
+val generatedRes = layout.buildDirectory.dir("generated/launcher-res")
 
 val copyShaders by tasks.registering(Copy::class) {
     from("../../pc/shaders")
