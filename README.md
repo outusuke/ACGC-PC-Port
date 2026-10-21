@@ -197,7 +197,7 @@ This fork builds on the PC port by [FlyingMeta](https://github.com/flyngmt/ACGC-
 
 ## AI Notice
 
-AI tools such as Claude were used in this project (PC port code only).
+AI tools such as Claude were used in this project.
 
 ## FAQ
 
