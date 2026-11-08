@@ -1,0 +1,17 @@
+#!/bin/sh
+# Game resolves rom/, save/ and shaders/ relative to cwd, so run from a user data dir
+HERE="${APPDIR:-$(dirname "$(readlink -f "$0")")}"
+
+data="${ACGC_DATA_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/ACGC-PC-Port}"
+mkdir -p "$data/rom" "$data/save" "$data/texture_pack" || exit 1
+ln -sfn "$HERE/usr/share/ac-pc-port/shaders" "$data/shaders"
+cd "$data" || exit 1
+
+export LD_LIBRARY_PATH="$HERE/usr/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+
+case " $* " in
+  *" --verbose "*|*" -v "*)
+    "$HERE/usr/bin/AnimalCrossing" "$@" 2>&1 | tee "$data/verbose.log"
+    exit ;;
+esac
+exec "$HERE/usr/bin/AnimalCrossing" "$@"

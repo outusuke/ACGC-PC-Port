@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=Animal Crossing PC Port
+Comment=PC port of the Animal Crossing decompilation
+Exec=AnimalCrossing
+Icon=ac-pc-port
+Categories=Game;
+Terminal=false
+Actions=verbose;
+
+[Desktop Action verbose]
+Name=Run with verbose log
+Exec=AnimalCrossing --verbose

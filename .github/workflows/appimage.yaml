@@ -1,0 +1,92 @@
+name: AppImage
+
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag to publish a release for, e.g. v1.0.0 (empty to only build)
+        required: false
+
+jobs:
+  appimage:
+    name: AppImage-${{ matrix.arch }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # oldest runner for glibc compatibility
+          - { arch: x86_64,  os: ubuntu-22.04,     tool_arch: x86_64  }
+          - { arch: aarch64, os: ubuntu-22.04-arm, tool_arch: aarch64 }
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc g++ cmake ninja-build libsdl2-dev libgl-dev file
+
+      - name: Build
+        run: |
+          cmake -S pc -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=/usr
+          cmake --build build -j"$(nproc)"
+          DESTDIR="$PWD/AppDir" cmake --install build
+
+      - name: Prepare AppDir
+        run: |
+          # AppRun symlinks shaders into the data dir
+          mkdir -p AppDir/usr/share/ac-pc-port
+          mv AppDir/usr/bin/shaders AppDir/usr/share/ac-pc-port/shaders
+          install -Dm644 pc/res/icon.png \
+            AppDir/usr/share/icons/hicolor/512x512/apps/ac-pc-port.png
+          install -Dm644 appimage/ac-pc-port.desktop \
+            AppDir/usr/share/applications/ac-pc-port.desktop
+
+      - name: Build AppImage
+        env:
+          LINUXDEPLOY_OUTPUT_VERSION: ${{ github.ref_name }}-${{ github.run_number }}
+          APPIMAGE_EXTRACT_AND_RUN: 1
+        run: |
+          curl -fsSL -o linuxdeploy \
+            "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-${{ matrix.tool_arch }}.AppImage"
+          chmod +x linuxdeploy
+          ARCH=${{ matrix.tool_arch }} ./linuxdeploy \
+            --appdir AppDir \
+            --executable AppDir/usr/bin/AnimalCrossing \
+            --desktop-file AppDir/usr/share/applications/ac-pc-port.desktop \
+            --icon-file AppDir/usr/share/icons/hicolor/512x512/apps/ac-pc-port.png \
+            --custom-apprun appimage/AppRun \
+            --output appimage
+          mkdir -p dist
+          mv ./*.AppImage dist/AnimalCrossing-${{ matrix.arch }}.AppImage
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: AnimalCrossing-AppImage-${{ matrix.arch }}
+          path: dist/*.AppImage
+
+  release:
+    needs: appimage
+    if: inputs.tag != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          path: dist
+          merge-multiple: true
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/*.AppImage --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            gh release create "$TAG" dist/*.AppImage --repo "$GITHUB_REPOSITORY" \
+              --target "$GITHUB_SHA" --title "$TAG" --generate-notes
+          fi
